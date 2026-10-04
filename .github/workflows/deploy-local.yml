@@ -8,6 +8,11 @@ on:
   repository_dispatch:
     types: [ content-updated ]  # Must match event-type from trigger
 
+# Push and content-updated deploys share one checkout; run them one at a time.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: self-hosted
@@ -16,13 +21,22 @@ jobs:
 
     defaults:
       run:
-        working-directory: /prod-storage/srv/blog/Shirone
+        # Server checkout: set the DEPLOY_DIR repository variable to override;
+        # otherwise it follows the repository name.
+        working-directory: ${{ vars.DEPLOY_DIR || format('/prod-storage/srv/blog/{0}', github.event.repository.name) }}
 
     steps:
       - name: SSH Pre-Test
         run: |
           whoami
-          ssh -T git@github.com-blog-repo:Hoshinowo-Yuki/Shirone.git || true
+          ssh -T git@github.com-blog-repo || true
+
+      - name: Update the server checkout
+        run: |
+          set -Eeuo pipefail
+          git fetch --prune origin main
+          git merge --ff-only origin/main
+          git log -1 --oneline
 
       - name: Build and Deploy, without taking down the currently running site
         id: build
