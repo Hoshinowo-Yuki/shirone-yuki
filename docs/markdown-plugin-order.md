@@ -29,6 +29,7 @@
 | 统计与摘要 | `remarkReadingTime`、`remarkExcerpt` | 不得消费未解析的作者 directive | 生成文章统计和摘要元数据 |
 | Directive 解析 | `remarkDirective` | 所有 directive 归一化插件之后 | 将 `::`、`:::`、`{.class}` 等输入解析为 directive AST |
 | 行内归一化（directive 后） | `remarkSupersub`、`remarkColoredText`、`remarkKeyboard` | `remarkDirective` 之后；`remarkFeatureProbes` 之前 | 校验并归一化 `:sup`/`:sub`/`^内容^`、颜色名 directive 与 `keyboard`；非法输入还原为原文，作者属性只保留白名单 |
+| 容器改写（directive 后） | `remarkTabs` | `remarkDirective` 之后；`remarkFeatureProbes` 之前 | 把含 `::tab` 行的 `:::tabs` 改写为 `tab-set`，使探针记录 `tabs` 而非 `option-groups`；非法容器展开为普通 Markdown，`::tab` 行还原为原文 |
 | 能力探针 | `remarkFeatureProbes` | `remarkDirective` 之后；`remarkSectionize`、`parseDirectiveNode` 之前 | 根据规范化 AST 写入 `remarkPluginFrontmatter.markdownSyntaxes` |
 | 章节结构 | `remarkSectionize` | 能力探针之后 | 生成文章章节结构，不得改变能力快照 |
 | HAST 桥接准备 | `parseDirectiveNode` | Remark 阶段最后 | 为 Rehype 组件渲染写入 `data.hName` 和 `data.hProperties` |

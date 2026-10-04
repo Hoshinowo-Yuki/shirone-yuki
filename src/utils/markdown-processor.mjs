@@ -41,6 +41,7 @@ import { remarkKeyboard } from "../plugins/markdown/remark-keyboard.mjs";
 import { remarkMarker } from "../plugins/markdown/remark-marker.mjs";
 import { remarkOptionGroups } from "../plugins/markdown/remark-option-groups.mjs";
 import { remarkSupersub } from "../plugins/markdown/remark-supersub.mjs";
+import { remarkTabs } from "../plugins/markdown/remark-tabs.mjs";
 import { remarkYouTube } from "../plugins/markdown/remark-youtube.mjs";
 import { AcFunComponent } from "../plugins/rehype-component-acfun.mjs";
 import { AdmonitionComponent } from "../plugins/rehype-component-admonition.mjs";
@@ -55,6 +56,7 @@ import { ImageGridComponent } from "../plugins/rehype-component-image-grid.mjs";
 import { KeyboardComponent } from "../plugins/rehype-component-keyboard.mjs";
 import { MarkerComponent } from "../plugins/rehype-component-marker.mjs";
 import { SpoilerComponent } from "../plugins/rehype-component-spoiler.mjs";
+import { TabsComponent } from "../plugins/rehype-component-tabs.mjs";
 import { YouTubeComponent } from "../plugins/rehype-component-youtube.mjs";
 import { rehypeMarkdownImages } from "../plugins/rehype-markdown-images.mjs";
 import { rehypeResponsiveTables } from "../plugins/rehype-responsive-tables.mjs";
@@ -102,6 +104,7 @@ export const siteRemarkPlugins = [
 	remarkSupersub,
 	remarkColoredText,
 	remarkKeyboard,
+	remarkTabs,
 	remarkFeatureProbes,
 	remarkSectionize,
 	parseDirectiveNode,
@@ -141,6 +144,7 @@ export const siteRehypePlugins = [
 				"code-tree": CodeTreeComponent,
 				steps: StepsComponent,
 				chat: ChatComponent,
+				"tab-set": TabsComponent,
 				keyboard: KeyboardComponent,
 				"colored-text": ColoredTextComponent,
 				github: GithubCardComponent,

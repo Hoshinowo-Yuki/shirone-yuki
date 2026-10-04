@@ -23,9 +23,9 @@ Find other dropped features with `git log --author=星野ゆき` before `0929f01
 - Linux machine: Playwright's browsers are not installed. For ad-hoc screenshots, launch Chromium with `executablePath: "/usr/bin/brave"`; `pnpm exec playwright test` needs `npx playwright install` first. `gh` is not installed and there are no GitHub push credentials (HTTPS has no helper, the SSH key is not registered), so the user pushes. CI status can be read anonymously from `https://api.github.com/repos/Hoshinowo-Yuki/shirone-yuki/actions/runs?head_sha=<sha>`.
 - The dev server (`astro dev`, which daemonises; stop with `astro dev stop`) does not hot-reload Markdown plugin changes. After editing a remark/rehype plugin, stop it, delete `.astro/data-store.json`, and start it again.
 - CI's unit step runs every test: `node --test "tests/**/*.test.mjs"`, not only `tests/plugins/markdown/`.
-- Demo posts are not committed. Copies of the two demo posts used for visual checks live outside the repo in `/home/neko/projects/shirone-demo-posts/` (`inline-text-extensions.md`, `chat-transcripts.md`); copy one into `src/content/posts/` temporarily to preview, and remove it before committing.
+- Demo posts are not committed. Copies of the demo posts used for visual checks live outside the repo in `/home/neko/projects/shirone-demo-posts/` (`inline-text-extensions.md`, `chat-transcripts.md`, `tabs.md`); copy one into `src/content/posts/` temporarily to preview, and remove it before committing.
 
-## Feature 1: Markdown plugins (status: done, except tabs)
+## Feature 1: Markdown plugins (status: done)
 
 Refactored to upstream standards in `1c38ca3` after an audit agreed with the user. Each syntax now has a manifest entry, a feature probe, docs in `docs/markdown-extensions.md` (§3.6–3.10), a row in `docs/markdown-plugin-order.md`, and node tests. `src/plugins/markdown/common/` no longer exists.
 
@@ -36,6 +36,7 @@ Refactored to upstream standards in `1c38ca3` after an audit agreed with the use
 | keyboard | `:keyboard{key="Ctrl"}`, `:keyboard[Esc]`, `{… theme}`, `::keyboard{…}` alone on a line | `remark-keyboard.mjs`, `rehype-component-keyboard.mjs`, `styles/markdown/keyboard.css` |
 | furigana | `[漢字]{かんじ}`, `{に.ほん.ご}`, `{=きょう}`, `{a+b}`, `{*}` | `remark-furigana.mjs` (source rewrite like marker), `core/furigana.mjs`, `rehype-component-furigana.mjs` |
 | chat | `:::chat` with `[user\|time]`, `[user\|time\|right\|replyTo]`, `[[date]]` dividers, `((note))` | `rehype-component-chat.mjs`, `styles/markdown/chat.css` |
+| tabs | `:::tabs` with `::tab[Title]` lines (≥2, nothing before the first); `@tab` blocks stay option-groups | `remark-tabs.mjs` (rewrites to `tab-set`), `rehype-component-tabs.mjs`, `styles/markdown/tabs.css` |
 
 - `remark-highlight` was removed: upstream `remarkMarker` already owns `==text==`.
 - `core/directive-source.mjs` restores rejected directives as the author's exact source text.
@@ -46,21 +47,17 @@ Open items for this feature:
 - **Packaging:** npm-package mode (`src/integration/`, `docs/packaging-contract.md`) has not been checked with the new plugins.
 - **Playwright:** no `tests/site/*.spec.ts` fragments yet for these syntaxes; visual checks were done ad hoc with screenshots.
 
-## Tabs: removed, needs a refactor before it comes back
+## Tabs: rebuilt (2026-10-04)
 
-The restored `remark-tabs.js` and `src/styles/tabs.css` were removed (along with the `main.css` import and processor wiring) because the plugin needs a proper refactor. No post used it. Until it returns, the old author syntax `:::tabs` with `::tab[Title]` lines falls through to upstream option-groups and renders as flat content with unknown `<tab>` elements. Upstream's own `:::tabs` with `@tab` markers (option-groups) is unaffected.
+Rebuilt from scratch rather than restored, after the user chose the old author syntax and no-JS switching. Design reference: a borderless rounded card, plain text labels, the active label in primary with an underline as wide as the tab.
 
-What the original did: radio inputs plus `:has()` CSS to switch panels without JS, one group per `:::tabs`, titles from `::tab[Title]`. Reference it in `7db7b94` / `a511f96`.
-
-Audit findings to address in the refactor:
-
-- **First decide with the user:** make `::tab` another way to write upstream option-groups (which already has M3E tabs, `role="tablist"`, keyboard support and sync), or keep a separate component.
-- Tab group IDs and radio `name`s restarted at `tab-group-0` in every document, so on pages rendering several posts one tab group switched another.
-- The feature probe recorded it as `option-groups`, loading that pack unnecessarily.
-- Tab titles lost inline formatting; the header was built from raw HTML strings.
-- No `tablist`/`tab` roles; the CSS only handled 10 tabs.
-- If kept separate: follow the same pattern as the other plugins (normalise before `parseDirectiveNode`, rehype component, manifest entry, probe, stylesheet pack, tests).
+- Each tab is emitted as radio input, label, panel; `:checked + label + panel` switches them, and flex `order` puts every label in one row above the panels, so there is no tab-count limit and no client script. Arrow keys come from the native radios; screen readers hear a radio group, not ARIA tabs (accepted trade-off).
+- Group names are `shirone-tabs-<hash of file path + block source>-<n>`, so several posts on one page do not interfere.
+- The card uses `--surface-container-low`: the post card is already `--surface-container-lowest` (`--card-bg`), so it cannot be darker than the post without a fixed black, which the rules forbid. In dark mode the tabs card is slightly lighter than the post, unlike the reference image.
+- Switching fades the new panel in while it rises 8px (`--m3e-duration-long`, `--m3e-easing-standard`; the user found emphasized-decelerate too abrupt). It also plays once on page load, since CSS cannot tell load from switch. Off under reduced motion and in print.
+- Demo post: `/home/neko/projects/shirone-demo-posts/tabs.md`.
+- No Playwright spec yet (same gap as the other restored syntaxes).
 
 ## Remaining features to restore
 
-Not yet inventoried. Next session: list pre-sync commits by the user and agree the order with them.
+Inventory done on 2026-10-04: tabs was the only feature left, and it is now rebuilt, so nothing remains to restore. Everything else from the pre-sync commits is either still in the repo (404 page, privacy-policies page, favicons, Docker/nginx deploy), replaced by an upstream equivalent (ogImage handling), or lives in the separate private content repo (custom fonts such as HYTMR45W and LXGW WenKai TC, banner images). Do not restore fonts or banners into this repo.

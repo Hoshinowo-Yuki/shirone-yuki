@@ -113,6 +113,11 @@
 			"styles": ["src/styles/markdown/steps.css"]
 		},
 		{
+			"id": "tabs",
+			"syntaxes": ["tabs"],
+			"styles": ["src/styles/markdown/tabs.css"]
+		},
+		{
 			"id": "trees",
 			"syntaxes": ["code-tree", "file-tree"],
 			"styles": ["src/styles/markdown/trees.css"]
@@ -1523,6 +1528,37 @@
 				"下标没有简写：GFM 将 ~内容~ 解析为删除线，因此只提供 :sub[内容]。",
 				"^内容^ 简写不得包含空白或方括号；代码、数学公式和含 \\^ 转义的文本保留原文。",
 				"作者属性会被丢弃，空标签保留原文；输出原生 sup/sub，不增加样式、客户端模块或网络请求。"
+			]
+		},
+		{
+			"id": "tabs",
+			"name": "Tabs",
+			"status": "stable",
+			"category": "container",
+			"source": "shirone",
+			"summary": "使用 :::tabs 容器和 ::tab[标题] 行渲染可切换的选项卡，切换只依赖原生单选按钮与 CSS，面板保留完整 Markdown。",
+			"forms": [
+				{
+					"kind": "container-directive",
+					"pattern": ":::tabs ... ::tab[Title] ... ::tab[Title] ... :::",
+					"example": ":::tabs\n::tab[自我介紹]\n- 中文\n::tab[**Self**-Introduction]\n- [English](https://example.com)\n:::"
+				}
+			],
+			"attributes": [],
+			"implementation": [
+				"src/plugins/markdown/remark-tabs.mjs",
+				"src/plugins/rehype-component-tabs.mjs"
+			],
+			"registeredIn": "src/utils/markdown-processor.mjs",
+			"styles": ["src/styles/markdown/tabs.css"],
+			"runtime": { "mode": "none", "modules": [], "network": [] },
+			"docs": ["docs/markdown-extensions.md"],
+			"tests": ["tests/plugins/markdown/containers/tabs.test.mjs"],
+			"notes": [
+				"只有包含 ::tab 行的 :::tabs 由本语法处理；使用 @tab 标记的 :::tabs 仍属于 option-groups。",
+				"至少需要两个 ::tab 行，且第一个 ::tab 之前不能有内容；不合法的容器展开为普通 Markdown 并产生构建警告，::tab 行还原为原文。容器之外的 ::tab 行同样还原为原文。",
+				"标题保留行内 Markdown，面板保留完整块级 Markdown，可嵌套其他容器语法；第一个选项卡默认选中。",
+				"每个选项卡按 input、label、面板顺序输出，组 id 由文件路径、容器源文本与文档内序号生成，多篇文章同页渲染时互不干扰。方向键由原生单选按钮提供；无 CSS 或打印时按顺序显示全部标题与面板。"
 			]
 		},
 		{

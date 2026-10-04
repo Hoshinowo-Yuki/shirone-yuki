@@ -220,6 +220,23 @@ E = mc^2^，H:sub[2]O，:sup[**加粗上标**]
 
 `rehype-component-chat.mjs` 输出 `<ol class="m3-chat not-prose">`，作者的 `left`/`right` 映射为逻辑方向的 `--start`/`--end`。左侧气泡与系统提示以 `on-surface` 叠色覆盖所在表面（类似 M3 状态层，因为文章卡片本身可能已是 surface-container 角色），右侧使用 `primary-container` 并跟随种子色，明暗模式均由 token 决定；回复图标为内联 SVG，不需要 hydration。样式包为 `markdown/chat.css`。空容器不输出 DOM；空容器、无消息头和未知 position 会写入 vfile 警告（Astro 目前不打印 vfile 消息）。
 
+### 3.11 选项卡
+
+`:::tabs` 容器配合独占一行的 `::tab[标题]` 渲染可切换的选项卡：
+
+```markdown
+:::tabs
+::tab[自我介紹]
+- 中文介紹
+::tab[**Self**-Introduction]
+- [English](https://example.com)
+:::
+```
+
+只有包含 `::tab` 行的 `:::tabs` 由本语法处理；使用 `@tab` 标记的 `:::tabs` 仍属于 3.5 选项组，两者互不影响。标题保留行内 Markdown，面板保留完整块级 Markdown，可以嵌套提示、聊天记录等其他容器（外层容器使用更多冒号，如 `::::tabs`）。第一个选项卡默认选中。至少需要两个 `::tab` 行，且第一个 `::tab` 之前不能有内容；不合法的容器展开为普通 Markdown 并写入 vfile 警告，`::tab` 行与容器之外的 `::tab` 行都还原为原文。
+
+`remark-tabs.mjs` 在 `remarkDirective` 之后把合法容器改写为 `tab-set` directive（因此能力探针只记录 `tabs`，不会加载选项组资源），并为每组生成由文件路径、容器源文本和文档内序号决定的稳定 id，多篇文章同页渲染时单选按钮组互不干扰。`rehype-component-tabs.mjs` 按 input、label、面板的顺序输出每个选项卡，`markdown/tabs.css` 用 `:checked + label + 面板` 切换显示，并用 flex `order` 把所有标题排在面板上方，因此选项卡数量不受限制，也不需要客户端脚本、hydration 或 Swup 生命周期处理。方向键切换由原生单选按钮提供，读屏器将其识别为单选按钮组；新显示的面板以淡入并上移 8px 的动画出现（`--m3e-duration-long`、`--m3e-easing-standard`，页面首次加载时同样播放一次），减少动态效果与打印时关闭；无 CSS 或打印时按源顺序显示全部标题与面板。
+
 ## 4. 缓存与刷新
 
 修改 remark/rehype 插件后，Astro dev 可能继续提供旧的 Markdown 编译结果。典型信号是：新 CSS 已出现，但插件新增的 class 或 DOM 结构不存在。
@@ -268,6 +285,7 @@ Admonitions、Collapse Panels、Option Groups、Marker、File Tree、Code Tree�
 - `tests/plugins/markdown/inline/keyboard.test.mjs`
 - `tests/plugins/markdown/inline/furigana.test.mjs`
 - `tests/plugins/markdown/containers/chat.test.mjs`
+- `tests/plugins/markdown/containers/tabs.test.mjs`
 - `tests/plugins/markdown/containers/file-tree.test.mjs`
 - `tests/plugins/markdown/containers/code-tree.test.mjs`
 - `tests/plugins/markdown/containers/steps.test.mjs`

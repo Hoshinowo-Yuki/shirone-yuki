@@ -163,6 +163,9 @@ export function remarkFeatureProbes() {
 			) {
 				syntaxes.add("image-presentation");
 			}
+			if (node.type === "containerDirective" && node.name === "tab-set") {
+				syntaxes.add("tabs");
+			}
 			if (node.type === "containerDirective" && node.name === "tabs") {
 				syntaxes.add("option-groups");
 			}
