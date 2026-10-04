@@ -4,6 +4,8 @@ Project rules live in `AGENTS.md`; read it first. This file tracks in-progress w
 
 ## Context: restoring custom features after the upstream sync
 
+**Detached from upstream from 2026-10-01.** `b7560d7` (2026-09-30) was the last upstream commit merged; upstream is no longer tracked or merged. The README was cut down to a short fork README, kept in English (`README.md`) and Traditional Chinese (`README.zh-TW.md`) only; keep the two in sync.
+
 The repo was synced with upstream (`0929f01`) and cleaned with defaults (`167b489`). Custom features added before the sync were dropped and are being restored **one feature at a time**. The working approach is **get it working first, refactor to upstream standards second**, with a read-only audit before each refactor.
 
 Pre-sync history still holds the originals. Use it as the reference when restoring:
